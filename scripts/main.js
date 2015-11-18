@@ -1,6 +1,8 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 
+var CSSTransitionGroup = require('react-addons-css-transition-group');
+
 var ReactRouter = require('react-router');
 var Router = ReactRouter.Router;
 var Route = ReactRouter.Route;
@@ -61,7 +63,7 @@ var App = React.createClass({
 		this.setState({ fishes: this.state.fishes });
 	},
 	removeFish: function (key) {
-		if (confirm("Are you sure you want to remove this fish?!")){	
+		if (confirm("Are you sure you want to remove this fish?!")){
 			this.state.fishes[key] = null;
 			this.setState({
 				fishes: this.state.fishes
@@ -87,7 +89,7 @@ var App = React.createClass({
 					</ul>
 				</div>
 				<Order fishes={this.state.fishes} order={this.state.order} removeFromOrder={this.removeFromOrder} />
-				<Inventory addFish={this.addFish} loadSamples={this.loadSamples} 
+				<Inventory addFish={this.addFish} loadSamples={this.loadSamples}
 					fishes={this.state.fishes} linkState={this.linkState} removeFish={this.removeFish} />
 			</div>
 		)
@@ -133,13 +135,13 @@ var AddFishForm = React.createClass({
 		event.preventDefault();
 		// 2. Take the data from the form and create an object
 		var fish = {
-			name: this.refs.name.value, 
+			name: this.refs.name.value,
 			price: this.refs.price.value,
 			status: this.refs.status.value,
 			desc: this.refs.desc.value,
 			image: this.refs.image.value
 		}
-		
+
 		// 3. Add the fish to the App State
 		this.props.addFish(fish);
 		this.refs.fishForm.reset();
@@ -171,7 +173,7 @@ var Header = React.createClass({
 	render: function () {
 		return (
 			<header className="top">
-				<h1>Catch 
+				<h1>Catch
 					<span className="ofThe">
 						<span className="of">of</span>
 						<span className="the">the</span>
@@ -193,17 +195,21 @@ var Order = React.createClass({
 		var fish = this.props.fishes[key];
 		var count = this.props.order[key];
 		var removeButton = <button onClick={this.props.removeFromOrder.bind(null, key)}>&times;</button>
-		
+
 		if (!fish) {
 			return <li key={key}>Sorry, fish no longer available! {removeButton}</li>
 		}
 
 		return (
-			<li>
-				{count}lbs
-				{fish.name}
+			<li key={key}>
+				<span>
+					<CSSTransitionGroup component="span" transitionName="count" transitionLeaveTimeout={250} transitionEnterTimeout={250} className="count">
+						<span key={count}>{count}</span>
+					</CSSTransitionGroup>
+
+					lbs {fish.name} {removeButton}
+				</span>
 				<span className="price">{h.formatPrice(count * fish.price)}</span>
-				{removeButton}
 			</li>
 		)
 	},
@@ -225,13 +231,21 @@ var Order = React.createClass({
 		return (
 			<div className="order-wrap">
 				<h2 className="order-title">Your Order</h2>
-				<ul className="order">
+
+				<CSSTransitionGroup
+					className="order"
+					component="ul"
+					transitionName="order"
+					transitionEnterTimeout={500}
+					transitionLeaveTimeout={500}
+					>
 					{orderIds.map(this.renderOrder)}
 					<li className="total">
 						<strong>Total:</strong>
 						{h.formatPrice(total)}
 					</li>
-				</ul>
+				</CSSTransitionGroup>
+
 			</div>
 		)
 	}
@@ -287,7 +301,7 @@ var StorePicker = React.createClass({
 	},
 	render: function () {
 		return (
-		  <form className="store-selector" onSubmit={this.goToStore}>	
+		  <form className="store-selector" onSubmit={this.goToStore}>
 				<h2>Please Enter a Store</h2>
 				<input type="text" ref="storeId" defaultValue={h.getFunName()} required />
 				<input type="Submit" />
@@ -310,7 +324,7 @@ var NotFound = React.createClass({
 	 Routes
 */
 
-var routes = (	
+var routes = (
 	<Router history={createBrowserHistory()}>
 		<Route path="/" component={StorePicker} />
 		<Route path="/store/:storeId" component={App} />
