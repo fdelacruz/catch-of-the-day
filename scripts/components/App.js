@@ -100,6 +100,7 @@ class App extends React.Component {
 			</div>
 		)
 	}
+
 }
 
 reactMixin.onClass(App, Catalyst.LinkedStateMixin);
